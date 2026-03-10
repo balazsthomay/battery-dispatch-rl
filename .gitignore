@@ -1,0 +1,24 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.claude
+SPEC.md
+CLAUDE.md
+
+# Data files (keep data/sample/)
+data/*.parquet
+data/**/*.parquet
+!data/sample/
+!data/sample/*.parquet
+
+# Results and artifacts
+results/
+*.pkl
+*.zip
