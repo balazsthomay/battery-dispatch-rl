@@ -64,7 +64,7 @@ The consistent ranking (Oracle > SAC > DQN > Threshold > Do Nothing) across all 
 
 The SAC agent's dispatch over a sample DE_LU week shows:
 
-![SAC Dispatch](../results/report/sac_dispatch_de_lu.png)
+![SAC Dispatch](images/sac_dispatch_de_lu.png)
 
 - **Hours 0-50:** Mostly discharging — selling initial SoC during moderate-to-high prices
 - **Hours 50-80:** Heavy charging (green bars) — prices drop to low levels, agent fills battery
@@ -85,7 +85,7 @@ The heavy discharge bias reflects that starting at SoC=0.5 and selling stored en
 
 ## Revenue-Degradation Tradeoff
 
-![Strategy Comparison](../results/report/strategy_comparison_de_lu.png)
+![Strategy Comparison](images/strategy_comparison_de_lu.png)
 
 The chart reveals the core tradeoff:
 - **Threshold** minimizes degradation (63 EUR) but misses most revenue

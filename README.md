@@ -18,11 +18,11 @@ Reinforcement learning agent for optimal battery energy storage system (BESS) di
 
 SAC captures ~50% of oracle performance across all markets. Both RL agents generalize to unseen markets (NL, PL) without retraining, outperforming the tuned threshold baseline everywhere.
 
-![Cross-Market Heatmap](results/report/cross_market_heatmap.png)
+![Cross-Market Heatmap](docs/images/cross_market_heatmap.png)
 
 **SAC learned dispatch behavior** (DE_LU, sample week):
 
-![SAC Dispatch](results/report/sac_dispatch_de_lu.png)
+![SAC Dispatch](docs/images/sac_dispatch_de_lu.png)
 
 The agent charges aggressively during low-price periods (green, hours 50-80) and discharges during price peaks (red). SoC management is coherent — the battery fills during cheap hours and depletes during expensive ones.
 
