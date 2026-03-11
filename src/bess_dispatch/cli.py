@@ -39,12 +39,14 @@ def download(zone: str, year: tuple[int, ...], api_key: str | None) -> None:
     default="DE_LU",
     type=click.Choice(["DE_LU", "ES", "NL", "PL"]),
 )
+@click.option("--year", default=2023, type=int, help="Training data year")
 @click.option("--timesteps", default=100_000, type=int)
 @click.option("--save-dir", default="results/models", type=str)
 @click.option("--use-sample", is_flag=True, help="Use committed sample data")
 def train(
     algorithm: str,
     zone: str,
+    year: int,
     timesteps: int,
     save_dir: str,
     use_sample: bool,
@@ -58,11 +60,11 @@ def train(
         market_data = load_sample()
     else:
         loader = MarketDataLoader()
-        market_data = loader.load_market_data(zone)
+        market_data = loader.load_market_data(zone, year)
 
     tc = TrainingConfig(algorithm=algorithm, total_timesteps=timesteps)
 
-    click.echo(f"Training {algorithm} on {zone} for {timesteps} steps...")
+    click.echo(f"Training {algorithm} on {zone} {year} for {timesteps} steps...")
     if algorithm == "DQN":
         model, venv = train_dqn(market_data, training_config=tc, save_dir=save_dir)
     else:
@@ -75,12 +77,14 @@ def train(
 @click.option("--model", "model_path", required=True, type=str)
 @click.option("--algorithm", default="DQN", type=click.Choice(["DQN", "SAC"]))
 @click.option("--zone", default="DE_LU")
+@click.option("--year", default=2024, type=int, help="Evaluation data year")
 @click.option("--use-sample", is_flag=True)
 @click.option("--n-episodes", default=5, type=int)
 def evaluate(
     model_path: str,
     algorithm: str,
     zone: str,
+    year: int,
     use_sample: bool,
     n_episodes: int,
 ) -> None:
@@ -93,12 +97,19 @@ def evaluate(
         market_data = load_sample()
     else:
         loader = MarketDataLoader()
-        market_data = loader.load_market_data(zone)
+        market_data = loader.load_market_data(zone, year)
 
     vecnorm_path = str(Path(model_path).parent / "vecnormalize.pkl")
     model, venv = load_model(model_path, vecnorm_path, algorithm, market_data)
 
-    result = evaluate_policy(model, market_data, n_episodes=n_episodes)
+    # Wrap model to normalize observations using training stats
+    if venv is not None:
+        from bess_dispatch.agents.evaluate import NormalizedPolicy
+        policy = NormalizedPolicy(model, venv, discrete=(algorithm == "DQN"))
+    else:
+        policy = model
+
+    result = evaluate_policy(policy, market_data, n_episodes=n_episodes)
     click.echo(f"Mean reward: {result.mean_reward:.2f} ± {result.std_reward:.2f}")
     click.echo(f"Mean revenue: {result.mean_revenue:.2f}")
     click.echo(f"Mean degradation: {result.mean_degradation:.4f}")
@@ -106,8 +117,9 @@ def evaluate(
 
 @main.command()
 @click.option("--zone", default="DE_LU")
+@click.option("--year", default=2024, type=int, help="Evaluation data year")
 @click.option("--use-sample", is_flag=True)
-def baselines(zone: str, use_sample: bool) -> None:
+def baselines(zone: str, year: int, use_sample: bool) -> None:
     """Run baseline strategies and compare."""
     from bess_dispatch.agents.evaluate import evaluate_policy
     from bess_dispatch.baselines.do_nothing import DoNothingPolicy
@@ -119,7 +131,7 @@ def baselines(zone: str, use_sample: bool) -> None:
         market_data = load_sample()
     else:
         loader = MarketDataLoader()
-        market_data = loader.load_market_data(zone)
+        market_data = loader.load_market_data(zone, year)
 
     prices = market_data.prices.values
 

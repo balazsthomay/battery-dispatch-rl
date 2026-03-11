@@ -47,8 +47,8 @@ def train_dqn(
         learning_rate=tc.learning_rate,
         gamma=tc.gamma,
         exploration_fraction=tc.exploration_fraction,
-        buffer_size=min(10_000, max(tc.total_timesteps, 1000)),
-        verbose=0,
+        buffer_size=min(tc.total_timesteps, 100_000),
+        verbose=1,
         seed=tc.seed,
     )
 
@@ -96,8 +96,8 @@ def train_sac(
         learning_rate=tc.learning_rate,
         gamma=tc.gamma,
         ent_coef="auto",
-        buffer_size=min(10_000, max(tc.total_timesteps, 1000)),
-        verbose=0,
+        buffer_size=min(tc.total_timesteps, 100_000),
+        verbose=1,
         seed=tc.seed,
     )
 

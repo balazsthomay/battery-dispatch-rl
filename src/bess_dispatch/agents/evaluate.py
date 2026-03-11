@@ -11,6 +11,31 @@ from bess_dispatch.data.loader import MarketData
 from bess_dispatch.env.bess_env import BESSEnv
 
 
+class NormalizedPolicy:
+    """Wraps an SB3 model with VecNormalize obs normalization for raw-env eval.
+
+    Handles both discrete (DQN) and continuous (SAC) action spaces.
+    For DQN, maps discrete actions back to continuous power levels.
+    """
+
+    # Maps Discrete(5) indices to continuous power levels
+    DISCRETE_ACTIONS = np.array([-1.0, -0.5, 0.0, 0.5, 1.0], dtype=np.float32)
+
+    def __init__(self, model, venv, discrete: bool = False) -> None:
+        self.model = model
+        self.venv = venv
+        self.discrete = discrete
+
+    def predict(self, obs):
+        norm_obs = self.venv.normalize_obs(obs)
+        action, state = self.model.predict(norm_obs, deterministic=True)
+        if self.discrete:
+            # Map discrete action index to continuous power level
+            idx = int(action)
+            action = np.array([self.DISCRETE_ACTIONS[idx]], dtype=np.float32)
+        return action, state
+
+
 @dataclass
 class EpisodeDetail:
     """Detailed results from a single evaluation episode."""
